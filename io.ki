@@ -1,0 +1,6 @@
+func print(s) {};
+class Memory {
+    func read(offset, length) {};
+    func write(offset, data) {};
+    func size() {};
+};
