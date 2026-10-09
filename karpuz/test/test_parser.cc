@@ -129,18 +129,18 @@ TEST_F(ParserFixture, assignment) {
 }
 
 TEST_F(ParserFixture, func) {
-    verify_single("fn f() {};", "Func(n=Id(f), a=[], s=[])");
+    verify_single("fn f() {};", "Fn(n=Id(f), a=[], s=[])");
 }
 
 TEST_F(ParserFixture, func_args) {
-    verify_single("fn f(a1) {};", "Func(n=Id(f), a=FuncArgs([FArg(n=Id(a1))]), s=[])");
+    verify_single("fn f(a1) {};", "Fn(n=Id(f), a=FnArgs([FArg(n=Id(a1))]), s=[])");
 }
 
 TEST_F(ParserFixture, func_args_stmts) {
     verify_single("fn f(a1, a1) { v = 5; };",
-            "Func("
+            "Fn("
             "n=Id(f), "
-            "a=FuncArgs([FArg(n=Id(a1)), FArg(n=Id(a1))]), "
+            "a=FnArgs([FArg(n=Id(a1)), FArg(n=Id(a1))]), "
             "s=[Assignment(n=Id(v), i=Int(5))]"
             ")");
 }
@@ -156,9 +156,9 @@ TEST_F(ParserFixture, class_method) {
                 "s=["
                     "Members([Id(a)]), "
                     "Constructor(Id(f)), "
-                    "Func("
+                    "Fn("
                         "n=Id(f), "
-                        "a=FuncArgs("
+                        "a=FnArgs("
                             "["
                                 "FArg(n=Id(b)), "
                                 "FArg(n=Id(c))"
@@ -183,7 +183,7 @@ TEST_F(ParserFixture, import) {
 TEST_F(ParserFixture, call) {
     verify_single("a.b.c(d,e);",
             "Call(n=Dot(l=Dot(l=Id(a), r=Id(b)), r=Id(c)), "
-            "a=FuncArgs([Id(d), Id(e)]))");
+            "a=FnArgs([Id(d), Id(e)]))");
 }
 
 TEST_F(ParserFixture, if_then_empty) {
