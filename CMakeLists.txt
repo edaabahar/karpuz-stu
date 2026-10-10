@@ -85,7 +85,7 @@ add_flex_bison_dependency(LEXER PARSER)
 
 include(EncodeString)
 amp_encode_string(
-    INPUT         "${CMAKE_CURRENT_LIST_DIR}/io.ki"
+    INPUT         "${CMAKE_CURRENT_LIST_DIR}/io.ka"
     NAME          FILE_io_ki
     HEADER_OUTPUT HEADER_IO_KI
     SOURCE_OUTPUT SOURCE_IO_KI
