@@ -1,4 +1,4 @@
-func print(s) {};
+fn print(s) {};
 class Memory {
     func read(offset, length) {};
     func write(offset, data) {};
