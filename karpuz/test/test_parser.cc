@@ -166,7 +166,7 @@ TEST_F(ParserFixture, class_method) {
                         "), "
                         "s=["
                             "Assignment("
-                                "n=Dot(l=Id(my), r=Id(a))"
+                                "n=Dot(l=Id(my), r=Id(a)), "
                                 "i=Add(l=Id(b), r=Id(c))"
                             ")"
                         "]"
