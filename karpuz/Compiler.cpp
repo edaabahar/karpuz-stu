@@ -4,9 +4,9 @@
 
 #include <fmt/format.h>
 
-#include <resource/FILE_io_ki.h>
+#include <resource/FILE_io_ka.h>
 
-Node::Ptr SymbolTable::s_module_ki;
+Node::Ptr SymbolTable::s_module_ka;
 Node::Ptr SymbolTable::s_module_io;
 
 SymbolTable::~SymbolTable() {}
@@ -102,7 +102,7 @@ SymbolTable::SymbolTable()
                   std::make_shared<Scope>(Scope::SymTab{}, ScopeType::Module, nullptr),
           }) {
     if (! s_module_io) {
-        s_module_io = Compiler::current()->compile_module(FILE_io_ki);
+        s_module_io = Compiler::current()->compile_module(FILE_io_ka);
     }
 }
 

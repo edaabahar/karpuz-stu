@@ -90,7 +90,7 @@ private:
 
     std::vector<std::shared_ptr<Scope>> m_symbols;
 
-    static Node::Ptr s_module_ki;
+    static Node::Ptr s_module_ka;
     static Node::Ptr s_module_io;
 };
 
