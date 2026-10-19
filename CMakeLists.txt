@@ -86,9 +86,9 @@ add_flex_bison_dependency(LEXER PARSER)
 include(EncodeString)
 amp_encode_string(
     INPUT         "${CMAKE_CURRENT_LIST_DIR}/io.ka"
-    NAME          FILE_io_ki
-    HEADER_OUTPUT HEADER_IO_KI
-    SOURCE_OUTPUT SOURCE_IO_KI
+    NAME          FILE_io_ka
+    HEADER_OUTPUT HEADER_IO_KA
+    SOURCE_OUTPUT SOURCE_IO_KA
 )
 
 include_directories(
@@ -135,8 +135,8 @@ add_library(karpuz STATIC
     ${BISON_PARSER_OUTPUTS}
     ${FLEX_LEXER_OUTPUTS}
 
-    ${HEADER_IO_KI}
-    ${SOURCE_IO_KI}
+    ${HEADER_IO_KA}
+    ${SOURCE_IO_KA}
 
     lexer.hpp
     main.h
