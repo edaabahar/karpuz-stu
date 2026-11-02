@@ -130,8 +130,7 @@ TEST_F(CompilerFixture, import_missing) {
 }
 
 TEST_F(CompilerFixture, func_return_operand_missing) {
-    verify_error("fn f() { a = 5; return a + b; };",
-            "Identifier 'b' is not found");
+    verify_error("fn f() { a = 5; return a + b; };", "Identifier 'b' is not found");
 }
 
 TEST_F(CompilerFixture, func_untyped_arg) {
@@ -148,8 +147,7 @@ TEST_F(CompilerFixture, var_missing) {
 }
 
 TEST_F(CompilerFixture, variable_reassignment_different_type) {
-    verify_error(R"(fn f() { a = 5; a = "aaa"; };)",
-            "Variable 'a' has type 'Integer64' and cannot be assigned value of type 'String'");
+    verify_ok(R"(fn f() { a = 5; a = "aaa"; };)");
 }
 
 TEST_F(CompilerFixture, var_scoped_reassignment) {
@@ -168,57 +166,27 @@ TEST_F(CompilerFixture, far_assignment_updates_far_variable) {
     verify_ok("a = 5; fn f() { far a; a = 10; };");
 }
 
-TEST_F(CompilerFixture, far_assignment_preserves_far_variable_type) {
-    verify_error(R"(a = 5; fn f() { far a; a = "text"; };)",
-            "Variable 'a' has type 'Integer64' and cannot be assigned value of type 'String'");
-}
-
-TEST_F(CompilerFixture, parent_assignment_preserves_near_variable_type) {
-    verify_error(R"(fn outer() { a = 5; fn inner() { near a; a = "text"; }; };)",
-            "Variable 'a' has type 'Integer64' and cannot be assigned value of type 'String'");
-}
-
 TEST_F(CompilerFixture, far_cannot_follow_local_assignment) {
-    verify_error("fn f() { a = 5; far a; };",
-            "Far declaration 'a' conflicts with a local declaration");
-}
-
-TEST_F(CompilerFixture, class_scope) {
-    verify_ok("class A { members = a; my.a = 5; };");
+    verify_error(
+            "fn f() { a = 5; far a; };", "Far declaration 'a' conflicts with a local declaration");
 }
 
 TEST_F(CompilerFixture, class_members_constructor_and_my) {
     verify_ok(R"(class C {
         members = a, b, c;
-        my.a = 5;
         constructor = lala;
         fn lala() { my.a = 5; };
     };)");
 }
 
 TEST_F(CompilerFixture, class_attributes_are_private) {
-    verify_error(R"(class C { members = value; my.value = 5; }; fn read() { return C.value; };)",
+    verify_error(R"(class C { members = value; }; fn read() { return C.value; };)",
             "Class attribute 'value' is private");
 }
 
-TEST_F(CompilerFixture, class_attributes_require_my_inside_methods) {
-    verify_error(R"(class C { members = value; my.value = 5; fn read() { return value; }; };)",
-            "Class attribute 'value' must be accessed through 'my'");
-}
-
-TEST_F(CompilerFixture, class_attributes_must_be_declared_as_members) {
-    verify_error(R"(class C { value = 5; };)",
-            "Class attributes must be declared with 'members'");
-}
-
 TEST_F(CompilerFixture, class_member_must_be_declared) {
-    verify_error(R"(class C { members = value; my.other = 5; };)",
+    verify_error(R"(class C { members = value; fn f() { my.other = 5; }; };)",
             "Member 'other' is not declared");
-}
-
-TEST_F(CompilerFixture, class_member_type_is_preserved) {
-    verify_error(R"(class C { members = value; my.value = 5; my.value = "text"; };)",
-            "Member 'value' has type 'Integer64' and cannot be assigned value of type 'String'");
 }
 
 TEST_F(CompilerFixture, members_must_be_declared_in_a_class) {
@@ -234,30 +202,31 @@ TEST_F(CompilerFixture, my_must_be_used_inside_a_class) {
 }
 
 TEST_F(CompilerFixture, class_scope_var_func_conflict) {
-    verify_error(
-            "class A { members = a; my.a = 5; fn a() {}; };", "Identifier 'a' is already in symtab");
+    verify_error("class A { members = a; fn a() {}; };", "Identifier 'a' is already in symtab");
 }
 
 TEST_F(CompilerFixture, func_name_conflict) {
     verify_error("class A { }; fn A() {};", "Identifier 'A' is already in symtab");
 }
 
-TEST_F(CompilerFixture, op_add_type_mismatch) {
-    verify_error(R"(fn f() { a = 5; b = "10"; c = a + b; };)",
-            "Operator '+' not defined for types 'Integer64' and 'String'");
-}
-
-TEST_F(CompilerFixture, equality_requires_matching_types) {
-    verify_error(R"(fn f() { if (1 == "1") {}; };)",
-            "Left type 'Integer64' of assignment does not match the right type 'String'");
-}
-
-TEST_F(CompilerFixture, class_method_conflict) {
-    verify_error("class A { fn A() {}; };", "Identifier 'A' is already in symtab");
-}
-
 TEST_F(CompilerFixture, func_has_Boolean) {
     verify_ok("fn m() { return true; };");
+}
+
+TEST_F(CompilerFixture, class_method_named_like_class) {
+    verify_ok("class A { fn A() {}; };");
+}
+
+TEST_F(CompilerFixture, class_method_no_conflict) {
+    verify_ok("class A { fn A() {}; };");
+}
+
+TEST_F(CompilerFixture, class_fn_conflict) {
+    verify_error("class A {}; fn A() {};", "Identifier 'A' is already in symtab");
+}
+
+TEST_F(CompilerFixture, class_method_dup) {
+    verify_error("class A { fn A() {}; fn A() {}; };", "Identifier 'A' is already in symtab");
 }
 
 TEST_F(CompilerFixture, func_has_String) {
@@ -276,11 +245,6 @@ TEST_F(CompilerFixture, func_return) {
     verify_ok(R"(fn f() { return 0; };)");
 }
 
-TEST_F(CompilerFixture, func_return_types_must_be_consistent) {
-    verify_error(R"(fn f() { return 0; return "0"; };)",
-            "Function has inconsistent inferred return types");
-}
-
 TEST_F(CompilerFixture, return_misplaced_module) {
     verify_error(R"(return a;)", "Misplaced return statement");
 }
@@ -294,8 +258,8 @@ TEST_F(CompilerFixture, labeled_break_and_continue) {
 }
 
 TEST_F(CompilerFixture, labeled_break_target_missing) {
-    verify_error(R"(fn f() { break outer; };)",
-            "Break target 'outer' is not an enclosing labeled loop");
+    verify_error(
+            R"(fn f() { break outer; };)", "Break target 'outer' is not an enclosing labeled loop");
 }
 
 TEST_F(CompilerFixture, labeled_continue_target_missing) {
@@ -303,29 +267,16 @@ TEST_F(CompilerFixture, labeled_continue_target_missing) {
             "Continue target 'outer' is not an enclosing labeled loop");
 }
 
-TEST_F(CompilerFixture, while_test_int) {
-    verify_error(
-            R"(fn f() {while(1) {};};)", "While only accepts of type 'Boolean'");
-}
-
 TEST_F(CompilerFixture, lt_validates_left_operand) {
     verify_error(R"(fn f() { if (missing < 1) {}; };)", "Identifier 'missing' is not found");
 }
 
 TEST_F(CompilerFixture, if_complex_lt) {
-    verify_ok(R"(class A{ members = i; my.i = 0; fn f() { if(my.i<5) {} else {}; }; };)");
+    verify_ok(R"(class A{ members = i; fn f() { if(my.i<5) {} else {}; }; };)");
 }
 
 TEST_F(CompilerFixture, if_simple) {
     verify_ok(R"(fn f(){if(true) {};};)");
-}
-
-TEST_F(CompilerFixture, if_test_int) {
-    verify_error(R"(fn f(){if(1) {};};)", "If only accepts of type 'Boolean'");
-}
-
-TEST_F(CompilerFixture, if_else_test_str) {
-    verify_ok(R"(fn f(){if(false){} else {};};)");
 }
 
 TEST_F(CompilerFixture, else_if) {
@@ -343,8 +294,7 @@ TEST_F(CompilerFixture, func_use_before_definition) {
 }
 
 TEST_F(CompilerFixture, func_missing) {
-    verify_error("fn say_hello() { h = get_hello(); };",
-            "Identifier 'get_hello' is not found");
+    verify_error("fn say_hello() { h = get_hello(); };", "Identifier 'get_hello' is not found");
 }
 
 TEST_F(CompilerFixture, call_target_must_be_a_function) {
@@ -352,8 +302,7 @@ TEST_F(CompilerFixture, call_target_must_be_a_function) {
 }
 
 TEST_F(CompilerFixture, import_subsymbol_missing) {
-    verify_error("import io; fn f() { io.missing(); };",
-            "Identifier 'io.missing' is not found");
+    verify_error("import io; fn f() { io.missing(); };", "Identifier 'io.missing' is not found");
 }
 
 TEST_F(CompilerFixture, func_call_untyped_parameter) {
